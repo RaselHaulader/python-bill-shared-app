@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment & Due History Calculator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
+</head>
+
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h2>💰 Bill History & Calculator</h2>
+    </div>
+
+    <!-- Statistics Dashboard -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3 id="totalBills">${{ total_bill }}</h3>
+        <p>Total Bills</p>
+      </div>
+      <div class="stat-card total-deu">
+        <h3 id="totalOutstanding"
+          class="due-amount {% if total_bill >= total_due %}positive{% elif total_bill < total_due %}negative{% endif %}">
+          ${{ total_due }}</h3>
+        <p>Total Deu Amount</p>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="main-content">
+      <!-- Add Bill Card -->
+      <div class="card">
+        <h2>📝 Add Bill</h2>
+        <form method="POST" action="/add-shared-bill">
+          <div class="form-group">
+            <label>Bill Amount ($)</label>
+            <input type="number" name="amount" step="0.01" required placeholder="Enter total bill amount" />
+          </div>
+          <input type="hidden" name="person" value="Shared" />
+          <button type="submit" class="btn">Add Bill & Split</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- People Dashboard -->
+    <div class="dashboard">
+      <div id="peopleGrid" class="people-grid">
+        {% if all_people != blank %}
+        {% for person in all_people %}
+        <div class="person-card">
+          <h3>{{ person.name }}</h3>
+          <div
+            class="due-amount {% if person.due > 0 %}positive{% elif person.due < 0 %}negative{% else %}zero{% endif %}">
+            {% if person.due > 0 %}Deu: {% elif person.due < 0 %}Savings: {% endif %}${{ person.due }} </div>
+
+              <form method="POST" action="/add-payment">
+                <div class="form-group">
+                  <label>Payment Amount ($)</label>
+                  <input type="number" name="amount" step="0.01" required placeholder="Enter payment amount" />
+                  <input hidden name="person_id" value="{{ person.id }}" />
+                  <input hidden name="person_name" value="{{ person.name }}" />
+                </div>
+                <button type="submit" class="btn btn-secondary">Add Payment</button>
+              </form>
+              <details>
+                <summary>Add Personal bill</summary>
+                <div>
+                  <form method="POST" action="/add-person-bill">
+                    <div class="form-group">
+                      <input type="number" name="amount" step="0.01" required placeholder="Enter payment amount" />
+                      <input hidden name="person_id" value="{{ person.id }}" />
+                      <input hidden name="person_name" value="{{ person.name }}" />
+                    </div>
+                    <button type="submit" class="btn btn-danger">Add Bill</button>
+                  </form>
+                </div>
+              </details>
+          </div>
+          {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Manage People Card -->
+      <div class="card" style="margin-top: 30px;">
+        <h2>👤 Manage People</h2>
+        <form method="POST" action="/add-person" style="margin-bottom: 10px;">
+          <div class="form-group">
+            <label>New Person Name</label>
+            <input type="text" name="name" required placeholder="e.g., Alex" />
+          </div>
+          <button type="submit" class="btn btn-secondary">Add Person</button>
+        </form>
+
+        <form method="POST" action="/remove-person">
+          <div class="form-group">
+            <label>Remove Person</label>
+            <select name="person_id" required>
+              <option value="">Select Person</option>
+              {% for person in all_people %}
+              <option value="{{ person.id }}">{{ person.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-danger">Remove Person</button>
+        </form>
+      </div>
+
+      <!-- Transaction History -->
+      <div class="history-section">
+        <h2>📊 History</h2>
+        <div style="overflow-x: auto;">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Person</th>
+                <th>Amount</th>
+                <th>Type</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if all_history != blank %}
+              {% for single_history in all_history %}
+              <tr class="{% if single_history.bill_type == 'Paid' %}bill-entry{% else %}payment-entry{% endif %}">
+                <td>{{ single_history.name }}</td>
+                <td>{{ single_history.amount }}</td>
+                <td>{{ single_history.bill_type }}</td>
+                <td>${{ single_history.date }}</td>
+              </tr>
+              {% endfor %}
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="text-align: center; margin-top: 40px; padding: 20px; color: white; opacity: 0.8;">
+        <p>💡 All data is stored in the server database. Use export/import features if needed.</p>
+      </div>
+      <header>
+        <div class="actions">
+          <button type="button" class="btn btn-reset" onclick="openModal()">Reset All</button>
+
+          <!-- Confirmation Modal -->
+          <div id="confirmModal" class="modal">
+            <div class="modal-content">
+              <h2>Confirm Reset</h2>
+              <p>Enter password to reset all data:</p>
+              <form method="POST" action="/reset-data" onsubmit="return confirmPassword()">
+                <input type="password" id="resetPassword" name="password" required placeholder="Enter password">
+                <div class="modal-buttons">
+                  <button type="button" onclick="closeModal()">Cancel</button>
+                  <button type="submit">Confirm</button>
+                </div>
+              </form>
+              <p id="errorText" style="color:red; display:none;">Wrong password</p>
+            </div>
+          </div>
+          <form method="POST" action="/logout">
+            <button type="submit" class="btn btn-logout">Log Out</button>
+          </form>
+        </div>
+      </header>
+    </div>
+    <script>
+      function openModal() {
+        document.getElementById("confirmModal").style.display = "block";
+      }
+
+      function closeModal() {
+        document.getElementById("confirmModal").style.display = "none";
+        document.getElementById("errorText").style.display = "none";
+      }
+
+      function confirmPassword() {
+        const correctPassword = "23076873@reset"; // 🔒 Set your password here
+        const input = document.getElementById("resetPassword").value;
+
+        if (input === correctPassword) {
+          return true; // allow form submission
+        } else {
+          document.getElementById("errorText").style.display = "block";
+          return false; // prevent form submission
+        }
+      }
+    </script>
+</body>
+
+</html>
