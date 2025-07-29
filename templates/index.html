@@ -126,7 +126,7 @@
             </thead>
             <tbody>
               {% if all_history != blank %}
-              {% for single_history in all_history %}
+              {% for single_history in all_history | reverse %}
               <tr class="{% if single_history.bill_type == 'Paid' %}bill-entry{% else %}payment-entry{% endif %}">
                 <td>{{ single_history.name }}</td>
                 <td>{{ single_history.amount }}</td>
@@ -142,7 +142,7 @@
 
       <!-- Footer -->
       <div style="text-align: center; margin-top: 40px; padding: 20px; color: white; opacity: 0.8;">
-        <p>💡 All data is stored in the server database. Use export/import features if needed.</p>
+        <p>💡 All copyright reserved by Rasel - 2025.</p>
       </div>
       <header>
         <div class="actions">

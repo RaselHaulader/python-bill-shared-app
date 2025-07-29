@@ -105,12 +105,10 @@ def add_bill():
         current_bill = Bill.query.first()
         updated_bill = current_bill.bill_amount + amount
         updated_due = current_bill.deu_amount + amount
-        print('current_bill is', current_bill.bill_amount)
-        print('updated_bill is', updated_bill)
-        print('updated_due is', updated_due)
+        
         if current_bill:
-          current_bill.bill_amount = updated_bill
-          current_bill.deu_amount = updated_due
+          current_bill.bill_amount = round(updated_bill, 2)
+          current_bill.deu_amount = round(updated_due, 2)
         
         persons = Person.query.all()
         person_length = Person.query.count()
@@ -162,15 +160,15 @@ def add_payment():
     current_person = Person.query.get(int(person_id))
 
     if current_person:
-      current_person.due = float(current_person.due - amount)
+      current_person.due = round(float(current_person.due - amount), 2)
 
     current_bill = Bill.query.first()
     updated_bill = current_bill.bill_amount - amount
     updated_due = current_bill.deu_amount - amount
 
     if current_bill:
-      current_bill.bill_amount = updated_bill
-      current_bill.deu_amount = updated_due
+      current_bill.bill_amount = round(updated_bill, 2)
+      current_bill.deu_amount = round(updated_due, 2)
 
     new_history = History(name=person_name, amount=amount, bill_type="Paid", date=date)
     db.session.add(new_history)
@@ -192,8 +190,6 @@ def remove_person():
     if person_id:
         person = Person.query.get(int(person_id))
         if person:
-            # Remove associated payments if needed
-            Payment.query.filter_by(person_id=person.id).delete()
             db.session.delete(person)
             db.session.commit()
     return redirect('/')
