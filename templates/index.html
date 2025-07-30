@@ -20,13 +20,13 @@
     <!-- Statistics Dashboard -->
     <div class="stats-grid">
       <div class="stat-card">
-        <h3 id="totalBills">${{ total_bill }}</h3>
+        <h3 id="totalBills">৳ {{ total_bill }}</h3>
         <p>Total Bills</p>
       </div>
       <div class="stat-card total-deu">
         <h3 id="totalOutstanding"
           class="due-amount {% if total_bill >= total_due %}positive{% elif total_bill < total_due %}negative{% endif %}">
-          ${{ total_due }}</h3>
+          ৳ {{ total_due }}</h3>
         <p>Total Deu Amount</p>
       </div>
     </div>
@@ -38,7 +38,7 @@
         <h2>📝 Add Bill</h2>
         <form method="POST" action="/add-shared-bill">
           <div class="form-group">
-            <label>Bill Amount ($)</label>
+            <label>Bill Amount (৳)</label>
             <input type="number" name="amount" step="0.01" required placeholder="Enter total bill amount" />
           </div>
           <input type="hidden" name="person" value="Shared" />
@@ -56,11 +56,11 @@
           <h3>👨‍💼 {{ person.name }}</h3>
           <div
             class="due-amount {% if person.due > 0 %}positive{% elif person.due < 0 %}negative{% else %}zero{% endif %}">
-            {% if person.due > 0 %}Deu: {% elif person.due < 0 %}Savings: {% endif %}${{ person.due }} </div>
+            {% if person.due > 0 %}Deu: {% elif person.due < 0 %}Savings: {% endif %}৳ {{ person.due }} </div>
 
               <form method="POST" action="/add-payment">
                 <div class="form-group">
-                  <label>Payment Amount ($)</label>
+                  <label>Payment Amount (৳)</label>
                   <input type="number" name="amount" step="0.01" required placeholder="Enter payment amount" />
                   <input hidden name="person_id" value="{{ person.id }}" />
                   <input hidden name="person_name" value="{{ person.name }}" />
