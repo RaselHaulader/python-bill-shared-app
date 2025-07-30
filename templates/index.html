@@ -19,10 +19,6 @@
 
     <!-- Statistics Dashboard -->
     <div class="stats-grid">
-      <div class="stat-card">
-        <h3 id="totalBills">৳ {{ total_bill }}</h3>
-        <p>Total Bills</p>
-      </div>
       <div class="stat-card total-deu">
         <h3 id="totalOutstanding"
           class="due-amount {% if total_bill >= total_due %}positive{% elif total_bill < total_due %}negative{% endif %}">
