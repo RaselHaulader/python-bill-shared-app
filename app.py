@@ -33,7 +33,7 @@ def cleanup_old_history():
 def login():
     if request.method == 'POST':
         password = request.form.get('password')
-        if password == '23076873@entry':  # Replace with your password
+        if password == '1997':  # Replace with your password
             session['logged_in'] = True
             return redirect(url_for('index'))
         else:
